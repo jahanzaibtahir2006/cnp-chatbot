@@ -114,6 +114,14 @@
     .cnp-msg.cnp-user .cnp-msg-bubble { background:linear-gradient(135deg,#6b21a8,#c026a0); color:#fff; border-radius:14px 4px 14px 14px; }
     .cnp-msg-time { font-size:10px; color:#7c6a9a; margin-top:3px; padding:0 4px; }
 
+    .cnp-msg-bubble ul { padding-left:18px; margin:5px 0; list-style:disc; }
+    .cnp-msg-bubble ol { padding-left:18px; margin:5px 0; list-style:decimal; }
+    .cnp-msg-bubble li { margin:3px 0; line-height:1.5; }
+    .cnp-msg-bubble strong { font-weight:600; color:#4a0e7a; display:block; margin-top:6px; margin-bottom:2px; }
+    .cnp-msg.cnp-user .cnp-msg-bubble strong { color:#fff; }
+    .cnp-msg-bubble a { color:#6b21a8; text-decoration:underline; }
+    .cnp-msg.cnp-user .cnp-msg-bubble a { color:#f5c842; }
+
     .cnp-typing-dots { display:flex; align-items:center; gap:4px; padding:4px 2px; }
     .cnp-typing-dots span { width:7px; height:7px; border-radius:50%; background:#e879d4; animation:cnp-bounce 1.3s ease-in-out infinite; }
     .cnp-typing-dots span:nth-child(2){animation-delay:.16s}
@@ -161,7 +169,7 @@
   `;
   document.head.appendChild(style);
 
-  // ── HTML ──
+  // ── Config ──
   var LOGO = 'https://www.nutritional-psychology.org/wp-content/uploads/2022/04/cnp-logo.png';
   var WEBHOOK = 'https://jahanworkspace.app.n8n.cloud/webhook/185d65c5-4a4d-4b2e-9ce2-3e3282a971b4/chat';
   var QUESTIONS = ['What is nutritional psychology?','How can I join CNP?','What courses do you offer?','Tell me about CNP research'];
@@ -230,7 +238,7 @@
     quickDiv.appendChild(b);
   });
 
-  // ── Logic ──
+  // ── State ──
   var msgs    = document.getElementById('cnp-msgs');
   var input   = document.getElementById('cnp-input');
   var sendBtn = document.getElementById('cnp-send-btn');
@@ -300,6 +308,52 @@
     input.focus();
   }
 
+  // ── Format Message ──
+  // Handles: HTML from n8n, **bold**, *italic*, bullet lists, numbered lists, newlines
+  function formatMessage(text) {
+    // If n8n already returned HTML, render it directly with minor fixes
+    if (/<[a-z][\s\S]*>/i.test(text)) {
+      text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+      text = text.replace(/\n/g, '<br>');
+      return text;
+    }
+
+    // Bold & Italic
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+    // Line-by-line processing for lists
+    var lines = text.split('\n');
+    var html = [];
+    var inUL = false;
+    var inOL = false;
+
+    lines.forEach(function(line) {
+      var ulMatch = line.match(/^[\-\•]\s+(.+)/);
+      var olMatch = line.match(/^\d+[\.\)]\s+(.+)/);
+
+      if (ulMatch) {
+        if (inOL) { html.push('</ol>'); inOL = false; }
+        if (!inUL) { html.push('<ul>'); inUL = true; }
+        html.push('<li>' + ulMatch[1] + '</li>');
+      } else if (olMatch) {
+        if (inUL) { html.push('</ul>'); inUL = false; }
+        if (!inOL) { html.push('<ol>'); inOL = true; }
+        html.push('<li>' + olMatch[1] + '</li>');
+      } else {
+        if (inUL) { html.push('</ul>'); inUL = false; }
+        if (inOL) { html.push('</ol>'); inOL = false; }
+        html.push(line.trim() === '' ? '<br>' : line + '<br>');
+      }
+    });
+
+    if (inUL) html.push('</ul>');
+    if (inOL) html.push('</ol>');
+
+    return html.join('');
+  }
+
   function addMsg(role, text) {
     var isBot = role === 'bot';
     var wrap = document.createElement('div');
@@ -312,7 +366,7 @@
     col.className = 'cnp-msg-col';
     var bubble = document.createElement('div');
     bubble.className = 'cnp-msg-bubble';
-    bubble.innerHTML = text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/\n/g,'<br>');
+    bubble.innerHTML = formatMessage(text);
     var time = document.createElement('div');
     time.className = 'cnp-msg-time';
     time.textContent = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
