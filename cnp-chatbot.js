@@ -114,9 +114,9 @@
     .cnp-msg.cnp-user .cnp-msg-bubble { background:linear-gradient(135deg,#6b21a8,#c026a0); color:#fff; border-radius:14px 4px 14px 14px; }
     .cnp-msg-time { font-size:10px; color:#7c6a9a; margin-top:3px; padding:0 4px; }
 
-    .cnp-msg-bubble ul { padding-left:18px; margin:5px 0; list-style:disc; }
-    .cnp-msg-bubble ol { padding-left:18px; margin:5px 0; list-style:decimal; }
-    .cnp-msg-bubble li { margin:3px 0; line-height:1.5; }
+    .cnp-msg-bubble ul { padding-left:18px; margin:0; list-style:disc; }
+    .cnp-msg-bubble ol { padding-left:18px; margin:0; list-style:decimal; }
+    .cnp-msg-bubble li { margin:0; line-height:1.5; }
     .cnp-msg-bubble strong { font-weight:600; color:#4a0e7a; }
     .cnp-msg.cnp-user .cnp-msg-bubble strong { color:#fff; }
     .cnp-msg-bubble a { color:#6b21a8; text-decoration:underline; }
