@@ -117,7 +117,7 @@
     .cnp-msg-bubble ul { padding-left:18px; margin:5px 0; list-style:disc; }
     .cnp-msg-bubble ol { padding-left:18px; margin:5px 0; list-style:decimal; }
     .cnp-msg-bubble li { margin:3px 0; line-height:1.5; }
-    .cnp-msg-bubble strong { font-weight:600; color:#4a0e7a; display:block; margin-top:6px; margin-bottom:2px; }
+    .cnp-msg-bubble strong { font-weight:600; color:#4a0e7a; }
     .cnp-msg.cnp-user .cnp-msg-bubble strong { color:#fff; }
     .cnp-msg-bubble a { color:#6b21a8; text-decoration:underline; }
     .cnp-msg.cnp-user .cnp-msg-bubble a { color:#f5c842; }
