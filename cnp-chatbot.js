@@ -107,7 +107,7 @@
     .cnp-msg.cnp-bot .cnp-msg-avatar { background:#f3e8ff; border:1.5px solid rgba(107,33,168,.2); padding:3px; }
     .cnp-msg.cnp-bot .cnp-msg-avatar img { width:100%; height:100%; object-fit:contain; }
     .cnp-msg.cnp-user .cnp-msg-avatar { background:linear-gradient(135deg,#6b21a8,#c026a0); color:#fff; }
-    .cnp-msg-col { display:flex; flex-direction:column; max-width:80%; }
+    .cnp-msg-col { display:flex; flex-direction:column; max-width:90%; }
     .cnp-msg.cnp-user .cnp-msg-col { align-items:flex-end; }
     .cnp-msg-bubble { padding:10px 13px; border-radius:14px; font-size:13.5px; line-height:1.58; color:#1e1033; }
     .cnp-msg.cnp-bot .cnp-msg-bubble { background:#fff; border-radius:4px 14px 14px 14px; box-shadow:0 2px 10px rgba(107,33,168,.1); border:1px solid rgba(107,33,168,.08); }
@@ -121,6 +121,36 @@
     .cnp-msg.cnp-user .cnp-msg-bubble strong { color:#fff; }
     .cnp-msg-bubble a { color:#6b21a8; text-decoration:underline; }
     .cnp-msg.cnp-user .cnp-msg-bubble a { color:#f5c842; }
+
+    /* Course Series Buttons */
+    .cnp-series-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .cnp-series-btn {
+      background: linear-gradient(135deg, #f3e8ff, #fdf8ff);
+      border: 1.5px solid rgba(107,33,168,0.25);
+      border-radius: 12px;
+      padding: 10px 8px;
+      cursor: pointer;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: #4a0e7a;
+      text-align: center;
+      transition: all 0.2s;
+      line-height: 1.3;
+    }
+    .cnp-series-btn:hover {
+      background: linear-gradient(135deg, #6b21a8, #c026a0);
+      color: #fff;
+      border-color: transparent;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(107,33,168,0.3);
+    }
+    .cnp-series-btn .series-emoji { font-size: 16px; display: block; margin-bottom: 4px; }
 
     .cnp-typing-dots { display:flex; align-items:center; gap:4px; padding:4px 2px; }
     .cnp-typing-dots span { width:7px; height:7px; border-radius:50%; background:#e879d4; animation:cnp-bounce 1.3s ease-in-out infinite; }
@@ -172,6 +202,45 @@
   var LOGO = 'https://www.nutritional-psychology.org/wp-content/uploads/2022/04/cnp-logo.png';
   var WEBHOOK = 'https://jahanworkspace.app.n8n.cloud/webhook/185d65c5-4a4d-4b2e-9ce2-3e3282a971b4/chat';
   var QUESTIONS = ['What is nutritional psychology?','How can I join CNP?','What courses do you offer?','Tell me about CNP research'];
+
+  // ── Course Data ──
+  var COURSE_SERIES = {
+    'NP 100 Series': {
+      emoji: '1️⃣',
+      label: 'NP 100 Series\nIntroductory Certificate',
+      courses: [
+        { name: 'NP 110: Introduction to Nutritional Psychology Methods', url: 'https://www.nutritional-psychology.org/education/np-110/' },
+        { name: 'NP 120 Part I: Microbes in our Gut', url: 'https://www.nutritional-psychology.org/np-120/np-120-part-1/' },
+        { name: 'NP 120 Part II: The Gut Microbiota and Mental Health', url: 'https://www.nutritional-psychology.org/np-120/np-120-part-2/' },
+        { name: 'NP 150 Part I: Mechanisms in the Diet-Mental Health Relationship', url: 'https://www.nutritional-psychology.org/education/np-150-part-1/' },
+        { name: 'NP 150 Part II: Mechanisms in the DMHR (Continued)', url: 'https://www.nutritional-psychology.org/np-150/np-150-part-2/' },
+      ]
+    },
+    'NP 300 Series': {
+      emoji: '2️⃣',
+      label: 'NP 300 Series\nAdvanced Certificate',
+      courses: [
+        { name: 'NP 300', url: 'https://www.nutritional-psychology.org/np-300/' },
+        { name: 'NP 310', url: 'https://www.nutritional-psychology.org/np-310/' },
+        { name: 'NP 320', url: 'https://www.nutritional-psychology.org/np-320/' },
+      ]
+    },
+    'NP 500 Series': {
+      emoji: '3️⃣',
+      label: 'NP 500 Series',
+      courses: [
+        { name: 'NP 500', url: 'https://www.nutritional-psychology.org/np-500/' },
+        { name: 'NP 510', url: 'https://www.nutritional-psychology.org/np-510/' },
+      ]
+    },
+    'Special Programs': {
+      emoji: '4️⃣',
+      label: 'Special Programs',
+      courses: [
+        { name: 'NP-FMA Micro-Degree in Nutritional Psychology', url: 'https://www.nutritional-psychology.org/micro-degree/' },
+      ]
+    }
+  };
 
   // Toggle Button
   var btn = document.createElement('button');
@@ -281,7 +350,6 @@
     var text = input.value.trim();
     if (!text || sendBtn.disabled) return;
 
-    // Hide quick replies permanently on first message
     if (quickShown) {
       quickDiv.style.display = 'none';
       quickShown = false;
@@ -304,13 +372,104 @@
       var reply = data.output || data.text || data.message || data.response ||
         (Array.isArray(data) && (data[0]?.output || data[0]?.text)) ||
         'I apologize, I could not process your request.';
-      addMsg('bot', reply);
+
+      // Check if AI returned SHOW_COURSES keyword
+      if (reply.trim() === 'SHOW_COURSES') {
+        showCourseSeriesButtons();
+      } else {
+        addMsg('bot', reply);
+      }
     } catch(err) {
       removeTyping(tid);
       addMsg('bot', '⚠️ Connection issue. Please try again.');
     }
     sendBtn.disabled = false;
     input.focus();
+  }
+
+  // ── Show Course Series Buttons ──
+  function showCourseSeriesButtons() {
+    var wrap = document.createElement('div');
+    wrap.className = 'cnp-msg cnp-bot';
+    wrap.style.animation = 'cnp-msgIn .28s cubic-bezier(.34,1.56,.64,1)';
+
+    var avatar = document.createElement('div');
+    avatar.className = 'cnp-msg-avatar';
+    avatar.innerHTML = '<img src="' + LOGO + '" style="width:100%;height:100%;object-fit:contain" onerror="this.parentNode.textContent=\'🧠\'"/>';
+
+    var col = document.createElement('div');
+    col.className = 'cnp-msg-col';
+
+    var bubble = document.createElement('div');
+    bubble.className = 'cnp-msg-bubble';
+    bubble.innerHTML = '<strong>CNP Courses</strong><br>CNP offers 10 courses across 3 series plus special programs.<br>Select a series to explore:';
+
+    var grid = document.createElement('div');
+    grid.className = 'cnp-series-grid';
+
+    Object.keys(COURSE_SERIES).forEach(function(seriesName) {
+      var series = COURSE_SERIES[seriesName];
+      var seriesBtn = document.createElement('button');
+      seriesBtn.className = 'cnp-series-btn';
+      seriesBtn.innerHTML = '<span class="series-emoji">' + series.emoji + '</span>' + series.label.replace('\n', '<br>');
+      seriesBtn.onclick = function() {
+        showSeriesCourses(seriesName);
+      };
+      grid.appendChild(seriesBtn);
+    });
+
+    bubble.appendChild(grid);
+
+    var time = document.createElement('div');
+    time.className = 'cnp-msg-time';
+    time.textContent = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+
+    col.appendChild(bubble);
+    col.appendChild(time);
+    wrap.appendChild(avatar);
+    wrap.appendChild(col);
+    msgs.appendChild(wrap);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  // ── Show Courses for Selected Series ──
+  function showSeriesCourses(seriesName) {
+    var series = COURSE_SERIES[seriesName];
+    addMsg('user', seriesName);
+
+    var wrap = document.createElement('div');
+    wrap.className = 'cnp-msg cnp-bot';
+
+    var avatar = document.createElement('div');
+    avatar.className = 'cnp-msg-avatar';
+    avatar.innerHTML = '<img src="' + LOGO + '" style="width:100%;height:100%;object-fit:contain" onerror="this.parentNode.textContent=\'🧠\'"/>';
+
+    var col = document.createElement('div');
+    col.className = 'cnp-msg-col';
+
+    var bubble = document.createElement('div');
+    bubble.className = 'cnp-msg-bubble';
+
+    var html = '<strong>' + series.emoji + ' ' + seriesName + '</strong><br>';
+    html += '<ul>';
+    series.courses.forEach(function(course) {
+      html += '<li><a href="' + course.url + '" target="_blank">' + course.name + '</a></li>';
+    });
+    html += '</ul>';
+    html += '<br><a href="https://www.nutritional-psychology.org/courses" target="_blank">View All CNP Courses</a>';
+
+    bubble.innerHTML = html;
+
+    var time = document.createElement('div');
+    time.className = 'cnp-msg-time';
+    time.textContent = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+
+    col.appendChild(bubble);
+    col.appendChild(time);
+    wrap.appendChild(avatar);
+    wrap.appendChild(col);
+    msgs.appendChild(wrap);
+    msgs.scrollTop = msgs.scrollHeight;
   }
 
   // ── Format Message ──
