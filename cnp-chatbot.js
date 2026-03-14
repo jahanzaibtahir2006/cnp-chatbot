@@ -128,8 +128,7 @@
     .cnp-typing-dots span:nth-child(3){animation-delay:.32s}
     @keyframes cnp-bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-7px)}}
 
-    .cnp-quick-replies, .cnp-inline-quick { display:flex; flex-wrap:wrap; gap:6px; padding:2px 14px 10px; }
-    .cnp-inline-quick { padding:4px 0 2px 38px; animation:cnp-msgIn .28s cubic-bezier(.34,1.56,.64,1); }
+    .cnp-quick-replies { display:flex; flex-wrap:wrap; gap:6px; padding:2px 14px 10px; }
     .cnp-quick-btn {
       background:#fff; border:1.5px solid rgba(107,33,168,.25); color:#6b21a8;
       border-radius:20px; padding:5px 12px; font-size:12px;
@@ -228,8 +227,9 @@
     </div>`;
   document.body.appendChild(win);
 
-  // ── Quick Replies (initial) ──
+  // ── Quick Replies (initial only) ──
   var quickDiv = document.getElementById('cnp-quick');
+  var quickShown = true;
   QUESTIONS.forEach(function(q) {
     var b = document.createElement('button');
     b.className = 'cnp-quick-btn';
@@ -272,7 +272,7 @@
 
   function sendQuick(text) {
     quickDiv.style.display = 'none';
-    document.querySelectorAll('.cnp-inline-quick').forEach(function(el){ el.remove(); });
+    quickShown = false;
     input.value = text;
     sendMessage();
   }
@@ -280,11 +280,17 @@
   async function sendMessage() {
     var text = input.value.trim();
     if (!text || sendBtn.disabled) return;
+
+    // Hide quick replies permanently on first message
+    if (quickShown) {
+      quickDiv.style.display = 'none';
+      quickShown = false;
+    }
+
     addMsg('user', text);
     input.value = '';
     input.style.height = 'auto';
     sendBtn.disabled = true;
-    document.querySelectorAll('.cnp-inline-quick').forEach(function(el){ el.remove(); });
     var tid = addTyping();
     try {
       var res = await fetch(WEBHOOK, {
@@ -299,7 +305,6 @@
         (Array.isArray(data) && (data[0]?.output || data[0]?.text)) ||
         'I apologize, I could not process your request.';
       addMsg('bot', reply);
-quickDiv.style.display = 'none';
     } catch(err) {
       removeTyping(tid);
       addMsg('bot', '⚠️ Connection issue. Please try again.');
@@ -309,30 +314,22 @@ quickDiv.style.display = 'none';
   }
 
   // ── Format Message ──
-  // Handles: HTML from n8n, **bold**, *italic*, bullet lists, numbered lists, newlines
   function formatMessage(text) {
-    // If n8n already returned HTML, render it directly with minor fixes
     if (/<[a-z][\s\S]*>/i.test(text)) {
       text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
       text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
       text = text.replace(/\n/g, '<br>');
       return text;
     }
-
-    // Bold & Italic
     text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
-
-    // Line-by-line processing for lists
     var lines = text.split('\n');
     var html = [];
     var inUL = false;
     var inOL = false;
-
     lines.forEach(function(line) {
       var ulMatch = line.match(/^[\-\•]\s+(.+)/);
       var olMatch = line.match(/^\d+[\.\)]\s+(.+)/);
-
       if (ulMatch) {
         if (inOL) { html.push('</ol>'); inOL = false; }
         if (!inUL) { html.push('<ul>'); inUL = true; }
@@ -347,10 +344,8 @@ quickDiv.style.display = 'none';
         html.push(line.trim() === '' ? '<br>' : line + '<br>');
       }
     });
-
     if (inUL) html.push('</ul>');
     if (inOL) html.push('</ol>');
-
     return html.join('');
   }
 
@@ -389,23 +384,6 @@ quickDiv.style.display = 'none';
   function removeTyping(id) {
     var el = document.getElementById(id);
     if (el) el.remove();
-  }
-
-  function addInlineQuick() {
-    var div = document.createElement('div');
-    div.className = 'cnp-inline-quick';
-    QUESTIONS.forEach(function(q) {
-      var b = document.createElement('button');
-      b.className = 'cnp-quick-btn';
-      b.textContent = q;
-      b.onclick = function() {
-        document.querySelectorAll('.cnp-inline-quick').forEach(function(el){ el.remove(); });
-        input.value = q; sendMessage();
-      };
-      div.appendChild(b);
-    });
-    msgs.appendChild(div);
-    msgs.scrollTop = msgs.scrollHeight;
   }
 
 })();
