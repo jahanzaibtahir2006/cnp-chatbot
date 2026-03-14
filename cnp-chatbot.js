@@ -374,7 +374,7 @@
         'I apologize, I could not process your request.';
 
       // Check if AI returned SHOW_COURSES keyword
-      if (reply.trim() === 'SHOW_COURSES') {
+      if (reply.trim().includes('SHOW_COURSES')){        
         showCourseSeriesButtons();
       } else {
         addMsg('bot', reply);
