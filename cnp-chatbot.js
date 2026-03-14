@@ -299,7 +299,7 @@
         (Array.isArray(data) && (data[0]?.output || data[0]?.text)) ||
         'I apologize, I could not process your request.';
       addMsg('bot', reply);
-      addInlineQuick();
+quickDiv.style.display = 'none';
     } catch(err) {
       removeTyping(tid);
       addMsg('bot', '⚠️ Connection issue. Please try again.');
