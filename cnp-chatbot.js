@@ -302,7 +302,22 @@
 
   var LOGO = 'https://www.nutritional-psychology.org/wp-content/uploads/2022/04/cnp-logo.png';
   var WEBHOOK = 'https://jahanworkspace.app.n8n.cloud/webhook/185d65c5-4a4d-4b2e-9ce2-3e3282a971b4/chat';
-  var QUESTIONS = ['What is nutritional psychology?','How can I join CNP?','What courses do you offer?','Tell me about CNP research'];
+  var ALL_QUESTIONS = [
+    'What is nutritional psychology?',
+    'How can I join CNP?',
+    'What courses do you offer?',
+    'Tell me about CNP research',
+    'What is the gut-brain connection?',
+    'How does diet affect mood?',
+    'Who founded CNP?',
+    'What are CNP scholarships?',
+    'What is the NP 110 course?',
+    'How does nutrition affect mental health?'
+  ];
+  function getRandomQuestions(n) {
+    return ALL_QUESTIONS.slice().sort(function(){ return Math.random() - 0.5; }).slice(0, n);
+  }
+  var QUESTIONS = getRandomQuestions(4);
 
   // ── CHANGE 1: Replaced number emojis with clean professional text labels ──
   var COURSE_SERIES = {
