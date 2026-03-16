@@ -208,7 +208,7 @@
   var HISTORY_KEY = 'cnp_chat_history';
   var unreadCount = 0;
 
-  var TYPING_STATUSES = ['Thinking...','Preparing your answer...','Searching...','Analyzing your question...'];
+  var TYPING_STATUSES = ['Thinking...','Searching...','Preparing your answer...','Looking that up...','Analyzing your question...'];
 
   // ── Follow-up map — only for specific topics ──
   var FOLLOWUP_MAP = {
