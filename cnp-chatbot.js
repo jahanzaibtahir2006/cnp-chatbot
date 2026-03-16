@@ -119,7 +119,6 @@
     .cnp-msg-col{display:flex;flex-direction:column;max-width:90%;position:relative;}
     .cnp-msg.cnp-user .cnp-msg-col{align-items:flex-end;}
     .cnp-msg-bubble{padding:10px 13px;border-radius:14px;font-size:13.5px;line-height:1.58;color:#1e1033;position:relative;}
-    .cnp-msg.cnp-bot .cnp-msg-bubble{background:#fff;border-radius:4px 14px 14px 14px;box-shadow:0 2px 10px rgba(107,33,168,.1);border:1px solid rgba(107,33,168,.08);}
     .cnp-msg.cnp-user .cnp-msg-bubble{background:linear-gradient(135deg,#6b21a8,#c026a0);color:#fff;border-radius:14px 4px 14px 14px;}
     .cnp-msg-time{font-size:10px;color:#7c6a9a;margin-top:3px;padding:0 4px;}
     .cnp-msg-bubble ul{padding-left:18px;margin:0;list-style:disc}
@@ -129,21 +128,16 @@
     .cnp-msg.cnp-user .cnp-msg-bubble strong{color:#fff}
     .cnp-msg-bubble a{color:#6b21a8;text-decoration:underline}
     .cnp-msg.cnp-user .cnp-msg-bubble a{color:#f5c842}
-
-    /* ── Copy Button (top-right on hover) ── */
-    .cnp-copy-btn {
-      position:absolute;top:-10px;right:-6px;
-      display:none;align-items:center;gap:3px;
-      padding:3px 8px;border-radius:10px;
-      background:#fff;border:1px solid rgba(107,33,168,0.2);
-      color:#7c6a9a;font-size:10px;font-family:'Source Sans 3',sans-serif;
-      cursor:pointer;font-weight:500;transition:all 0.2s;
-      box-shadow:0 2px 8px rgba(107,33,168,0.12);
-      white-space:nowrap;z-index:10;
+    .cnp-msg.cnp-bot .cnp-msg-bubble {
+      background:#fff;border-radius:4px 14px 14px 14px;
+      box-shadow:0 2px 10px rgba(107,33,168,.1);border:1px solid rgba(107,33,168,.08);
+      transition:box-shadow 0.2s, border-color 0.2s;
+      padding-top:26px;
     }
-    .cnp-msg-col:hover .cnp-copy-btn{display:flex;}
-    .cnp-copy-btn:hover{background:#f3e8ff;color:#4a0e7a;border-color:rgba(107,33,168,0.35);}
-    .cnp-copy-btn.copied{background:#f0fdf4;border-color:rgba(34,197,94,0.35);color:#16a34a;}
+    .cnp-msg.cnp-bot .cnp-msg-bubble:hover {
+      box-shadow:0 4px 18px rgba(107,33,168,.15);
+      border-color:rgba(107,33,168,0.2);
+    }
 
     /* ── Typing ── */
     .cnp-typing-wrap{display:flex;align-items:center;gap:8px;}
@@ -154,11 +148,23 @@
     @keyframes cnp-bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-7px)}}
     .cnp-typing-status{font-size:11px;color:#b09cc8;font-style:italic;animation:cnp-sfade 1.8s ease-in-out infinite;}
     @keyframes cnp-sfade{0%,100%{opacity:0.5}50%{opacity:1}}
+    .cnp-copy-btn {
+      position:absolute;top:6px;right:8px;
+      display:none;align-items:center;gap:3px;
+      padding:2px 7px;border-radius:8px;
+      background:rgba(107,33,168,0.07);border:1px solid rgba(107,33,168,0.18);
+      color:#9b7cc4;font-size:9.5px;font-family:'Source Sans 3',sans-serif;
+      cursor:pointer;font-weight:600;transition:all 0.18s;
+      white-space:nowrap;z-index:10;
+    }
+    .cnp-msg-bubble:hover .cnp-copy-btn { display:flex; }
+    .cnp-copy-btn:hover { background:rgba(107,33,168,0.15);color:#4a0e7a;border-color:rgba(107,33,168,0.35); }
+    .cnp-copy-btn.copied { background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.35);color:#16a34a; }
 
-    /* ── Follow-up Suggestions ── */
-    .cnp-followup-wrap{display:flex;flex-wrap:wrap;gap:5px;padding:2px 0 0 38px;animation:cnp-msgIn .3s ease;}
-    .cnp-followup-btn{background:linear-gradient(135deg,#f3e8ff,#fdf8ff);border:1.5px solid rgba(107,33,168,0.2);border-radius:16px;padding:5px 11px;font-size:11.5px;font-family:'Source Sans 3',sans-serif;cursor:pointer;font-weight:500;color:#6b21a8;transition:all 0.2s;}
-    .cnp-followup-btn:hover{background:linear-gradient(135deg,#6b21a8,#c026a0);color:#fff;border-color:transparent;transform:translateY(-1px);}
+    /* ── Follow-up Suggestions (single line, wrap only if needed) ── */
+    .cnp-followup-wrap { display:flex;flex-wrap:nowrap;gap:6px;padding:2px 0 0 38px;animation:cnp-msgIn .3s ease;overflow:visible; }
+    .cnp-followup-btn { background:linear-gradient(135deg,#f3e8ff,#fdf8ff);border:1.5px solid rgba(107,33,168,0.2);border-radius:16px;padding:5px 11px;font-size:11.5px;font-family:'Source Sans 3',sans-serif;cursor:pointer;font-weight:500;color:#6b21a8;transition:all 0.2s;white-space:nowrap; }
+    .cnp-followup-btn:hover { background:linear-gradient(135deg,#6b21a8,#c026a0);color:#fff;border-color:transparent;transform:translateY(-1px); }
 
     /* ── Course Series ── */
     .cnp-series-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
@@ -208,7 +214,7 @@
   var HISTORY_KEY = 'cnp_chat_history';
   var unreadCount = 0;
 
-  var TYPING_STATUSES = ['Thinking...','Searching...','Preparing your answer...','Looking that up...','Analyzing your question...'];
+  var TYPING_STATUSES = ['Thinking...','Searching the best...','Preparing your answer...','Looking that up...','Analyzing your question...'];
 
   // ── Follow-up map — only for specific topics ──
   var FOLLOWUP_MAP = {
