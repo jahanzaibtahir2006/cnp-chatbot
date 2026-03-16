@@ -37,7 +37,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      animation: cnp-bubble-in 0.5s cubic-bezier(.34,1.56,.64,1) forwards;
+      animation: cnp-bubble-in 0.6s cubic-bezier(.34,1.56,.64,1) forwards, cnp-bubble-wiggle 0.5s ease-in-out 1.2s 3;
       cursor: pointer;
       max-width: 220px;
       transition: box-shadow 0.2s, transform 0.2s;
@@ -54,6 +54,16 @@
     @keyframes cnp-bubble-out {
       from { opacity: 1; transform: translateX(0) scale(1); }
       to   { opacity: 0; transform: translateX(20px) scale(0.85); }
+    }
+    @keyframes cnp-bubble-wiggle {
+      0%   { transform: translateX(0) rotate(0deg); }
+      15%  { transform: translateX(-4px) rotate(-2deg); }
+      30%  { transform: translateX(4px) rotate(2deg); }
+      45%  { transform: translateX(-3px) rotate(-1.5deg); }
+      60%  { transform: translateX(3px) rotate(1.5deg); }
+      75%  { transform: translateX(-2px) rotate(-1deg); }
+      90%  { transform: translateX(2px) rotate(1deg); }
+      100% { transform: translateX(0) rotate(0deg); }
     }
     .cnp-bubble-dot {
       width: 8px; height: 8px; border-radius: 50%;
@@ -109,15 +119,46 @@
       box-shadow: 0 8px 32px rgba(107,33,168,0.45);
       display: flex; align-items: center; justify-content: center;
       transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s;
-      z-index: 999999; overflow: hidden;
+      z-index: 999999; overflow: visible;
+      animation: cnp-btn-entrance 0.7s cubic-bezier(.34,1.56,.64,1) forwards, cnp-btn-attention 4s ease-in-out 3s infinite;
     }
-    #cnp-toggle:hover { transform: scale(1.1); box-shadow: 0 14px 40px rgba(192,38,160,0.5); }
-    #cnp-toggle::before {
-      content: ''; position: absolute; inset: -3px; border-radius: 50%;
-      border: 2px solid var(--cnp-pink-light);
+    #cnp-toggle:hover {
+      transform: scale(1.12);
+      box-shadow: 0 16px 44px rgba(192,38,160,0.6);
+      animation: none;
+    }
+    /* Dual ripple rings */
+    #cnp-toggle::before, #cnp-toggle::after {
+      content: ''; position: absolute; inset: 0; border-radius: 50%;
+      border: 2px solid rgba(232,121,212,0.7);
       animation: cnp-ripple 2.8s ease-out infinite; opacity: 0;
+      pointer-events: none;
     }
-    @keyframes cnp-ripple { 0%{transform:scale(1);opacity:.6} 100%{transform:scale(1.6);opacity:0} }
+    #cnp-toggle::after {
+      border-color: rgba(107,33,168,0.5);
+      animation: cnp-ripple 2.8s ease-out 1.4s infinite;
+    }
+    #cnp-toggle.open::before, #cnp-toggle.open::after { animation: none; opacity: 0; }
+
+    @keyframes cnp-btn-entrance {
+      0%   { opacity: 0; transform: scale(0) rotate(-180deg); }
+      70%  { transform: scale(1.15) rotate(8deg); }
+      85%  { transform: scale(0.95) rotate(-4deg); }
+      100% { opacity: 1; transform: scale(1) rotate(0deg); }
+    }
+    @keyframes cnp-btn-attention {
+      0%,100% { transform: scale(1) rotate(0deg);   box-shadow: 0 8px 32px rgba(107,33,168,0.45); }
+      10%     { transform: scale(1.08) rotate(-8deg); box-shadow: 0 12px 36px rgba(192,38,160,0.55); }
+      20%     { transform: scale(1.08) rotate(8deg);  box-shadow: 0 12px 36px rgba(192,38,160,0.55); }
+      30%     { transform: scale(1.08) rotate(-5deg); }
+      40%     { transform: scale(1.08) rotate(5deg);  }
+      50%     { transform: scale(1.05) rotate(0deg);  box-shadow: 0 10px 34px rgba(107,33,168,0.5); }
+      60%,90% { transform: scale(1) rotate(0deg);   box-shadow: 0 8px 32px rgba(107,33,168,0.45); }
+    }
+    @keyframes cnp-ripple {
+      0%   { transform: scale(1);   opacity: 0.65; }
+      100% { transform: scale(1.9); opacity: 0; }
+    }
     #cnp-toggle .cnp-chat-icon { transition: opacity 0.25s, transform 0.25s; }
     #cnp-toggle .cnp-close-icon { position:absolute; opacity:0; transform:rotate(-90deg) scale(0.7); transition:opacity .25s,transform .25s; }
     #cnp-toggle.open .cnp-chat-icon { opacity:0; transform:rotate(90deg) scale(0.7); }
@@ -414,6 +455,8 @@
     win.classList.toggle('cnp-visible', isOpen);
     btn.classList.toggle('open', isOpen);
     if (isOpen) {
+      // Stop attention animation once user engages
+      btn.style.animation = 'none';
       bubble.classList.add('cnp-bubble-hide');
       setTimeout(function(){ bubble.style.display = 'none'; }, 300);
       setTimeout(function(){ input.focus(); }, 300);
