@@ -120,7 +120,7 @@
     .cnp-msg.cnp-user .cnp-msg-col{align-items:flex-end;}
     .cnp-msg-bubble{padding:10px 13px;border-radius:14px;font-size:13.5px;line-height:1.58;color:#1e1033;position:relative;}
     .cnp-msg.cnp-user .cnp-msg-bubble{background:linear-gradient(135deg,#6b21a8,#c026a0);color:#fff;border-radius:14px 4px 14px 14px;}
-    .cnp-msg-time{font-size:10px;color:#7c6a9a;margin-top:3px;padding:0 4px;}
+    .cnp-msg-time{font-size:10px;color:#7c6a9a;}
     .cnp-msg-bubble ul{padding-left:18px;margin:0;list-style:disc}
     .cnp-msg-bubble ol{padding-left:18px;margin:0;list-style:decimal}
     .cnp-msg-bubble li{margin:0;line-height:1.5}
@@ -148,22 +148,20 @@
     .cnp-typing-status{font-size:11px;color:#b09cc8;font-style:italic;animation:cnp-sfade 1.8s ease-in-out infinite;}
     @keyframes cnp-sfade{0%,100%{opacity:0.5}50%{opacity:1}}
 
-    /* ── Copy Button (small inline below message, shows on col hover) ── */
+    /* ── Copy Button (permanent, inline with timestamp) ── */
+    .cnp-msg-footer { display:flex; align-items:center; gap:6px; margin-top:3px; padding:0 4px; }
+    .cnp-msg-time { font-size:10px; color:#7c6a9a; }
     .cnp-copy-btn {
-      display:none; align-items:center; justify-content:center;
-      width:26px; height:26px; border-radius:6px; border:none;
-      background:transparent; color:#b09cc8;
+      display:flex; align-items:center; justify-content:center;
+      width:22px; height:22px; border-radius:5px; border:none;
+      background:transparent; color:#c4b0d8;
       cursor:pointer; transition:all 0.18s;
-      font-size:13px; padding:0; margin-top:2px;
+      font-size:12px; padding:0;
     }
-    .cnp-msg-col:hover .cnp-copy-btn { display:flex; }
     .cnp-copy-btn:hover { background:rgba(107,33,168,0.08); color:#6b21a8; }
     .cnp-copy-btn.copied { color:#16a34a; }
 
     /* ── Follow-up Suggestions (single line, wrap only if needed) ── */
-    .cnp-followup-wrap { display:flex;flex-wrap:nowrap;gap:6px;padding:2px 0 0 38px;animation:cnp-msgIn .3s ease;overflow:visible; }
-    .cnp-followup-btn { background:linear-gradient(135deg,#f3e8ff,#fdf8ff);border:1.5px solid rgba(107,33,168,0.2);border-radius:16px;padding:5px 11px;font-size:11.5px;font-family:'Source Sans 3',sans-serif;cursor:pointer;font-weight:500;color:#6b21a8;transition:all 0.2s;white-space:nowrap; }
-    .cnp-followup-btn:hover { background:linear-gradient(135deg,#6b21a8,#c026a0);color:#fff;border-color:transparent;transform:translateY(-1px); }
 
     /* ── Course Series ── */
     .cnp-series-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
@@ -216,31 +214,6 @@
   var TYPING_STATUSES = ['Thinking...','Searching knowledge base...','Preparing your answer...','Looking that up...','Analyzing your question...'];
 
   // ── Follow-up map — only for specific topics ──
-  var FOLLOWUP_MAP = {
-    course:     ['What are the prerequisites?','How much does it cost?'],
-    scholarship:['Who is eligible?','When is the next application period?'],
-    research:   ['How do I access the research library?','What topics are covered?'],
-    gut:        ['How does the microbiome affect mood?','What foods support gut health?'],
-    nutrition:  ['How does diet affect mental health?','What are key nutrients for the brain?'],
-    membership: ['What are the membership plans?','What do members get access to?'],
-    team:       ['Who are the CNP founders?','Who are the contributors?'],
-    advocacy:   ['How can I advocate for nutritional psychology?','How do I become a CNP contributor?']
-  };
-
-  function getFollowups(text) {
-    var t = text.toLowerCase();
-    // Only return suggestions for specific matched topics — no default fallback
-    if (t.includes('course') || t.includes('certificate') || t.includes('np 1') || t.includes('np 3') || t.includes('np 5')) return FOLLOWUP_MAP.course;
-    if (t.includes('scholarship')) return FOLLOWUP_MAP.scholarship;
-    if (t.includes('research') || t.includes('library') || t.includes('nprl')) return FOLLOWUP_MAP.research;
-    if (t.includes('gut') || t.includes('microbi')) return FOLLOWUP_MAP.gut;
-    if (t.includes('diet') || t.includes('food') || t.includes('nutrient') || t.includes('nutrition')) return FOLLOWUP_MAP.nutrition;
-    if (t.includes('member')) return FOLLOWUP_MAP.membership;
-    if (t.includes('founder') || t.includes('team') || t.includes('ephi') || t.includes('amanda')) return FOLLOWUP_MAP.team;
-    if (t.includes('advocate') || t.includes('advocacy') || t.includes('contributor') || t.includes('get involved')) return FOLLOWUP_MAP.advocacy;
-    return null; // No suggestions for general/unmatched replies
-  }
-
   var ALL_QUESTIONS = [
     'What is nutritional psychology?','How can I join CNP?',
     'What courses do you offer?','Tell me about CNP research',
@@ -385,8 +358,6 @@
     quickDiv.appendChild(r1); quickDiv.appendChild(r2);
   }
   function openQuickPanel(){
-    // Hide any existing follow-up suggestions
-    document.querySelectorAll('.cnp-followup-wrap').forEach(function(el){ el.parentElement.remove(); });
     loadQuestions();
     quickHeader.style.display='block'; quickDiv.style.display='block'; msgs.scrollTop=msgs.scrollHeight;
   }
@@ -422,8 +393,6 @@
     var text=input.value.trim();
     if(!text||sendBtn.disabled) return;
     closeQuickPanel();
-    // Remove any existing follow-up suggestions
-    document.querySelectorAll('.cnp-followup-wrap').forEach(function(el){ el.parentElement.remove(); });
     addMsg('user',text);
     input.value=''; input.style.height='auto'; sendBtn.disabled=true;
     var status=TYPING_STATUSES[Math.floor(Math.random()*TYPING_STATUSES.length)];
@@ -437,7 +406,7 @@
       var reply=data.output||data.text||data.message||data.response||
         (Array.isArray(data)&&(data[0]?.output||data[0]?.text))||'I apologize, I could not process your request.';
       if(reply.trim().includes('SHOW_COURSES')){ showCourseSeriesButtons(); }
-      else { addMsg('bot',reply); addFollowups(reply); }
+      else { addMsg('bot',reply); }
       if(!isOpen){
         unreadCount++;
         unreadBadge.textContent=unreadCount>9?'9+':String(unreadCount);
@@ -445,23 +414,6 @@
       }
     } catch(err){ removeTyping(tid); addMsg('bot','⚠️ Connection issue. Please try again.'); }
     sendBtn.disabled=false; input.focus();
-  }
-
-  // ── Follow-up Suggestions ──
-  function addFollowups(replyText){
-    var sugg=getFollowups(replyText);
-    if(!sugg||!sugg.length) return; // No suggestions for general replies
-    var wrap=document.createElement('div'); wrap.className='cnp-msg cnp-bot';
-    var sp=document.createElement('div'); sp.style.cssText='width:30px;flex-shrink:0;';
-    var col=document.createElement('div'); col.className='cnp-msg-col';
-    var fw=document.createElement('div'); fw.className='cnp-followup-wrap';
-    sugg.slice(0,2).forEach(function(s){
-      var b=document.createElement('button'); b.className='cnp-followup-btn'; b.textContent=s;
-      b.onclick=function(){ wrap.remove(); input.value=s; sendMessage(); };
-      fw.appendChild(b);
-    });
-    col.appendChild(fw); wrap.appendChild(sp); wrap.appendChild(col);
-    msgs.appendChild(wrap); msgs.scrollTop=msgs.scrollHeight;
   }
 
   // ── Copy Button (small emoji-style below message) ──
@@ -499,9 +451,11 @@
       grid.appendChild(sb);
     });
     bub.appendChild(grid);
+    var footer=document.createElement('div'); footer.className='cnp-msg-footer';
     var time=document.createElement('div'); time.className='cnp-msg-time';
     time.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-    col.appendChild(bub); col.appendChild(addCopyBtn(bub)); col.appendChild(time); wrap.appendChild(av); wrap.appendChild(col);
+    footer.appendChild(time); footer.appendChild(addCopyBtn(bub));
+    col.appendChild(bub); col.appendChild(footer); wrap.appendChild(av); wrap.appendChild(col);
     msgs.appendChild(wrap); msgs.scrollTop=msgs.scrollHeight;
   }
 
@@ -516,9 +470,11 @@
     series.courses.forEach(function(c){ h+='<li><a href="'+c.url+'" target="_blank">'+c.name+'</a></li>'; });
     h+='</ul><br><a href="https://www.nutritional-psychology.org/courses" target="_blank">View All CNP Courses</a>';
     bub.innerHTML=h;
+    var footer=document.createElement('div'); footer.className='cnp-msg-footer';
     var time=document.createElement('div'); time.className='cnp-msg-time';
     time.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-    col.appendChild(bub); col.appendChild(addCopyBtn(bub)); col.appendChild(time); wrap.appendChild(av); wrap.appendChild(col);
+    footer.appendChild(time); footer.appendChild(addCopyBtn(bub));
+    col.appendChild(bub); col.appendChild(footer); wrap.appendChild(av); wrap.appendChild(col);
     msgs.appendChild(wrap); msgs.scrollTop=msgs.scrollHeight;
   }
 
@@ -545,11 +501,12 @@
     if(isBot) av.innerHTML='<img src="'+LOGO+'" style="width:100%;height:100%;object-fit:contain" onerror="this.parentNode.textContent=\'🧠\'"/>'; else av.textContent='You';
     var col=document.createElement('div'); col.className='cnp-msg-col';
     var bub=document.createElement('div'); bub.className='cnp-msg-bubble'; bub.innerHTML=formatMessage(text);
+    var footer=document.createElement('div'); footer.className='cnp-msg-footer';
     var time=document.createElement('div'); time.className='cnp-msg-time';
     time.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-    col.appendChild(bub);
-    if(isBot && withCopy!==false){ col.appendChild(addCopyBtn(bub)); }
-    col.appendChild(time); wrap.appendChild(av); wrap.appendChild(col);
+    footer.appendChild(time);
+    if(isBot && withCopy!==false){ footer.appendChild(addCopyBtn(bub)); }
+    col.appendChild(bub); col.appendChild(footer); wrap.appendChild(av); wrap.appendChild(col);
     msgs.appendChild(wrap); msgs.scrollTop=msgs.scrollHeight;
   }
 
