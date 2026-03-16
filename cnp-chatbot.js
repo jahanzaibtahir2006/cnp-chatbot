@@ -37,7 +37,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      animation: cnp-bubble-in 0.6s cubic-bezier(.34,1.56,.64,1) forwards, cnp-bubble-wiggle 0.5s ease-in-out 1.2s 3;
+      animation: cnp-bubble-in 0.6s cubic-bezier(.34,1.56,.64,1) forwards, cnp-bubble-wiggle 0.6s ease-in-out 1.2s 1;
       cursor: pointer;
       max-width: 220px;
       transition: box-shadow 0.2s, transform 0.2s;
@@ -57,12 +57,10 @@
     }
     @keyframes cnp-bubble-wiggle {
       0%   { transform: translateX(0) rotate(0deg); }
-      15%  { transform: translateX(-4px) rotate(-2deg); }
-      30%  { transform: translateX(4px) rotate(2deg); }
-      45%  { transform: translateX(-3px) rotate(-1.5deg); }
-      60%  { transform: translateX(3px) rotate(1.5deg); }
-      75%  { transform: translateX(-2px) rotate(-1deg); }
-      90%  { transform: translateX(2px) rotate(1deg); }
+      20%  { transform: translateX(-3px) rotate(-1deg); }
+      40%  { transform: translateX(3px) rotate(1deg); }
+      60%  { transform: translateX(-2px) rotate(-0.5deg); }
+      80%  { transform: translateX(2px) rotate(0.5deg); }
       100% { transform: translateX(0) rotate(0deg); }
     }
     .cnp-bubble-dot {
