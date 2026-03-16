@@ -116,7 +116,7 @@
     .cnp-msg.cnp-bot .cnp-msg-avatar{background:#f3e8ff;border:1.5px solid rgba(107,33,168,.2);padding:3px;}
     .cnp-msg.cnp-bot .cnp-msg-avatar img{width:100%;height:100%;object-fit:contain;}
     .cnp-msg.cnp-user .cnp-msg-avatar{background:linear-gradient(135deg,#6b21a8,#c026a0);color:#fff;}
-    .cnp-msg-col{display:flex;flex-direction:column;max-width:90%;position:relative;}
+    .cnp-msg-col{display:flex;flex-direction:column;max-width:90%;}
     .cnp-msg.cnp-user .cnp-msg-col{align-items:flex-end;}
     .cnp-msg-bubble{padding:10px 13px;border-radius:14px;font-size:13.5px;line-height:1.58;color:#1e1033;position:relative;}
     .cnp-msg.cnp-user .cnp-msg-bubble{background:linear-gradient(135deg,#6b21a8,#c026a0);color:#fff;border-radius:14px 4px 14px 14px;}
@@ -148,20 +148,17 @@
     .cnp-typing-status{font-size:11px;color:#b09cc8;font-style:italic;animation:cnp-sfade 1.8s ease-in-out infinite;}
     @keyframes cnp-sfade{0%,100%{opacity:0.5}50%{opacity:1}}
 
-    /* ── Copy Button (floats above bubble top-right, shows on col hover) ── */
+    /* ── Copy Button (small inline below message, shows on col hover) ── */
     .cnp-copy-btn {
-      position:absolute;top:-10px;right:4px;
-      display:none;align-items:center;gap:3px;
-      padding:3px 8px;border-radius:8px;
-      background:#fff;border:1px solid rgba(107,33,168,0.22);
-      color:#7c6a9a;font-size:9.5px;font-family:'Source Sans 3',sans-serif;
-      cursor:pointer;font-weight:600;transition:all 0.18s;
-      box-shadow:0 2px 8px rgba(107,33,168,0.14);
-      white-space:nowrap;z-index:10;
+      display:none; align-items:center; justify-content:center;
+      width:26px; height:26px; border-radius:6px; border:none;
+      background:transparent; color:#b09cc8;
+      cursor:pointer; transition:all 0.18s;
+      font-size:13px; padding:0; margin-top:2px;
     }
     .cnp-msg-col:hover .cnp-copy-btn { display:flex; }
-    .cnp-copy-btn:hover { background:#f3e8ff;color:#4a0e7a;border-color:rgba(107,33,168,0.4); }
-    .cnp-copy-btn.copied { background:#f0fdf4;border-color:rgba(34,197,94,0.35);color:#16a34a; }
+    .cnp-copy-btn:hover { background:rgba(107,33,168,0.08); color:#6b21a8; }
+    .cnp-copy-btn.copied { color:#16a34a; }
 
     /* ── Follow-up Suggestions (single line, wrap only if needed) ── */
     .cnp-followup-wrap { display:flex;flex-wrap:nowrap;gap:6px;padding:2px 0 0 38px;animation:cnp-msgIn .3s ease;overflow:visible; }
@@ -467,15 +464,20 @@
     msgs.appendChild(wrap); msgs.scrollTop=msgs.scrollHeight;
   }
 
-  // ── Copy Button (top-right on hover) ──
+  // ── Copy Button (small emoji-style below message) ──
   function addCopyBtn(bubbleEl){
     var copyBtn=document.createElement('button');
     copyBtn.className='cnp-copy-btn';
-    copyBtn.innerHTML='<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy';
+    copyBtn.title='Copy message';
+    copyBtn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
     copyBtn.onclick=function(){
       navigator.clipboard.writeText(bubbleEl.innerText||bubbleEl.textContent).then(function(){
-        copyBtn.innerHTML='✓ Copied'; copyBtn.classList.add('copied');
-        setTimeout(function(){ copyBtn.innerHTML='<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy'; copyBtn.classList.remove('copied'); },2000);
+        copyBtn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+        copyBtn.classList.add('copied');
+        setTimeout(function(){
+          copyBtn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+          copyBtn.classList.remove('copied');
+        },2000);
       }).catch(function(){});
     };
     return copyBtn;
