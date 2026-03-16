@@ -57,10 +57,12 @@
     }
     @keyframes cnp-bubble-wiggle {
       0%   { transform: translateX(0) rotate(0deg); }
-      20%  { transform: translateX(-3px) rotate(-1deg); }
-      40%  { transform: translateX(3px) rotate(1deg); }
-      60%  { transform: translateX(-2px) rotate(-0.5deg); }
-      80%  { transform: translateX(2px) rotate(0.5deg); }
+      15%  { transform: translateX(-4px) rotate(-2deg); }
+      30%  { transform: translateX(4px) rotate(2deg); }
+      45%  { transform: translateX(-3px) rotate(-1.5deg); }
+      60%  { transform: translateX(3px) rotate(1.5deg); }
+      75%  { transform: translateX(-2px) rotate(-1deg); }
+      90%  { transform: translateX(2px) rotate(1deg); }
       100% { transform: translateX(0) rotate(0deg); }
     }
     .cnp-bubble-dot {
