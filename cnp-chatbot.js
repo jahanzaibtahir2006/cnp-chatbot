@@ -270,6 +270,18 @@
       font-family:'Source Sans 3',sans-serif; cursor:pointer; font-weight:500; transition:all .2s;
     }
     .cnp-quick-btn:hover { background:linear-gradient(135deg,#6b21a8,#c026a0); color:#fff; border-color:transparent; transform:translateY(-1px); }
+    .cnp-quick-refresh {
+      width:26px; height:26px; border-radius:50%;
+      background:rgba(107,33,168,0.08); border:1.5px solid rgba(107,33,168,0.2);
+      color:#7c3aed; cursor:pointer; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center;
+      transition:all 0.25s;
+    }
+    .cnp-quick-refresh:hover {
+      background:linear-gradient(135deg,#6b21a8,#c026a0);
+      color:#fff; border-color:transparent;
+      transform:rotate(180deg) scale(1.1);
+    }
 
     /* ── Hint Button in Header ── */
     #cnp-hint-btn {
@@ -523,7 +535,32 @@
         };
         quickDiv.appendChild(b);
       });
+      // Refresh button
+      var rfBtn = document.createElement('button');
+      rfBtn.className = 'cnp-quick-refresh';
+      rfBtn.title = 'Show different questions';
+      rfBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>';
+      rfBtn.onclick = function() {
+        quickDiv.innerHTML = '';
+        getRandomQuestions(4).forEach(function(q) {
+          var b = document.createElement('button');
+          b.className = 'cnp-quick-btn';
+          b.textContent = q;
+          b.onclick = function() {
+            quickDiv.style.display = 'none';
+            hintOpen = false;
+            hintBtn.classList.remove('cnp-hint-open');
+            input.value = q;
+            sendMessage();
+          };
+          quickDiv.appendChild(b);
+        });
+        quickDiv.appendChild(rfBtn);
+      };
+      quickDiv.appendChild(rfBtn);
       quickDiv.style.display = 'flex';
+      // Auto scroll to bottom so questions don't cover messages
+      msgs.scrollTop = msgs.scrollHeight;
     } else {
       quickDiv.style.display = 'none';
     }
