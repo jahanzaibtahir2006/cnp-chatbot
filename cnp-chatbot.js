@@ -263,7 +263,20 @@
     .cnp-typing-dots span:nth-child(3){animation-delay:.32s}
     @keyframes cnp-bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-7px)}}
 
-    .cnp-quick-replies { display:flex; flex-wrap:wrap; gap:6px; padding:2px 14px 10px; }
+    .cnp-quick-replies { display:flex; flex-wrap:wrap; gap:6px; padding:4px 14px 10px; }
+    .cnp-quick-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 8px 14px 4px;
+    }
+    .cnp-quick-header-label {
+      font-size:10px; font-weight:600; color:#b09cc8;
+      letter-spacing:0.6px; text-transform:uppercase;
+      display:flex; align-items:center; gap:5px;
+    }
+    .cnp-quick-header-label::before {
+      content:''; display:inline-block;
+      width:12px; height:1px; background:#d8b4fe;
+    }
     .cnp-quick-btn {
       background:#fff; border:1.5px solid rgba(107,33,168,.25); color:#6b21a8;
       border-radius:20px; padding:5px 12px; font-size:12px;
@@ -475,6 +488,14 @@
       <div class="cnp-gold-bar"></div>
     </div>
     <div class="cnp-messages" id="cnp-msgs"></div>
+    <div id="cnp-quick-header" style="display:none">
+      <div class="cnp-quick-header">
+        <span class="cnp-quick-header-label">Suggested topics</span>
+        <button class="cnp-quick-refresh" id="cnp-refresh-btn" title="Refresh questions">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        </button>
+      </div>
+    </div>
     <div class="cnp-quick-replies" id="cnp-quick"></div>
     <div class="cnp-input-area">
       <div class="cnp-input-row">
@@ -515,55 +536,48 @@
     hintBtn.style.animation = 'cnp-hint-wiggle 0.5s ease-in-out 1';
   }, 8000);
 
+  var quickHeader = document.getElementById('cnp-quick-header');
+  var refreshBtn  = document.getElementById('cnp-refresh-btn');
+
+  function loadQuestions() {
+    quickDiv.innerHTML = '';
+    getRandomQuestions(4).forEach(function(q) {
+      var b = document.createElement('button');
+      b.className = 'cnp-quick-btn';
+      b.textContent = q;
+      b.onclick = function() {
+        closeQuickPanel();
+        input.value = q;
+        sendMessage();
+      };
+      quickDiv.appendChild(b);
+    });
+  }
+
+  function openQuickPanel() {
+    loadQuestions();
+    quickHeader.style.display = 'block';
+    quickDiv.style.display = 'flex';
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function closeQuickPanel() {
+    quickHeader.style.display = 'none';
+    quickDiv.style.display = 'none';
+    hintOpen = false;
+    hintBtn.classList.remove('cnp-hint-open');
+  }
+
+  refreshBtn.addEventListener('click', function() {
+    refreshBtn.style.transform = 'rotate(180deg)';
+    setTimeout(function(){ refreshBtn.style.transform = ''; }, 300);
+    loadQuestions();
+  });
+
   hintBtn.addEventListener('click', function() {
     hintOpen = !hintOpen;
     hintBtn.classList.toggle('cnp-hint-open', hintOpen);
-    if (hintOpen) {
-      // Refresh with new random questions and show
-      quickDiv.innerHTML = '';
-      getRandomQuestions(4).forEach(function(q) {
-        var b = document.createElement('button');
-        b.className = 'cnp-quick-btn';
-        b.textContent = q;
-        b.onclick = function() {
-          quickDiv.style.display = 'none';
-          quickShown = false;
-          hintOpen = false;
-          hintBtn.classList.remove('cnp-hint-open');
-          input.value = q;
-          sendMessage();
-        };
-        quickDiv.appendChild(b);
-      });
-      // Refresh button
-      var rfBtn = document.createElement('button');
-      rfBtn.className = 'cnp-quick-refresh';
-      rfBtn.title = 'Show different questions';
-      rfBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>';
-      rfBtn.onclick = function() {
-        quickDiv.innerHTML = '';
-        getRandomQuestions(4).forEach(function(q) {
-          var b = document.createElement('button');
-          b.className = 'cnp-quick-btn';
-          b.textContent = q;
-          b.onclick = function() {
-            quickDiv.style.display = 'none';
-            hintOpen = false;
-            hintBtn.classList.remove('cnp-hint-open');
-            input.value = q;
-            sendMessage();
-          };
-          quickDiv.appendChild(b);
-        });
-        quickDiv.appendChild(rfBtn);
-      };
-      quickDiv.appendChild(rfBtn);
-      quickDiv.style.display = 'flex';
-      // Auto scroll to bottom so questions don't cover messages
-      msgs.scrollTop = msgs.scrollHeight;
-    } else {
-      quickDiv.style.display = 'none';
-    }
+    if (hintOpen) { openQuickPanel(); } else { closeQuickPanel(); }
   });
 
   var sessionId = sessionStorage.getItem('cnp_sid') || (function(){
@@ -614,9 +628,7 @@
   async function sendMessage() {
     var text = input.value.trim();
     if (!text || sendBtn.disabled) return;
-    quickDiv.style.display = 'none';
-    hintOpen = false;
-    hintBtn.classList.remove('cnp-hint-open');
+    closeQuickPanel();
     addMsg('user', text);
     input.value = '';
     input.style.height = 'auto';
