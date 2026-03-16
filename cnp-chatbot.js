@@ -301,12 +301,10 @@
     }
     @keyframes cnp-hint-wiggle {
       0%   { transform: rotate(0deg); }
-      15%  { transform: rotate(-10deg) scale(1.08); }
-      30%  { transform: rotate(10deg) scale(1.08); }
-      45%  { transform: rotate(-7deg); }
-      60%  { transform: rotate(7deg); }
-      75%  { transform: rotate(-3deg); }
-      90%  { transform: rotate(3deg); }
+      20%  { transform: rotate(-5deg) scale(1.04); }
+      40%  { transform: rotate(5deg) scale(1.04); }
+      60%  { transform: rotate(-3deg); }
+      80%  { transform: rotate(3deg); }
       100% { transform: rotate(0deg); }
     }
 
@@ -457,9 +455,9 @@
           <div class="cnp-status-dot"></div>
           <span>Online · Ready to help</span>
         </div>
-        <button id="cnp-hint-btn" title="Quick questions">
+        <button id="cnp-hint-btn" title="Explore topics">
           <div class="cnp-hint-dot"></div>
-          💡 Quick Questions
+          💡 Explore Topics
         </button>
       </div>
       <div class="cnp-gold-bar"></div>
@@ -501,9 +499,9 @@
   // Periodic wiggle every 4 seconds
   setInterval(function() {
     hintBtn.style.animation = 'none';
-    hintBtn.offsetHeight; // reflow to restart
+    hintBtn.offsetHeight;
     hintBtn.style.animation = 'cnp-hint-wiggle 0.5s ease-in-out 1';
-  }, 4000);
+  }, 8000);
 
   hintBtn.addEventListener('click', function() {
     hintOpen = !hintOpen;
