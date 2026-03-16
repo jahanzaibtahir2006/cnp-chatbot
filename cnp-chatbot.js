@@ -267,6 +267,99 @@
     }
     .cnp-quick-btn:hover { background:linear-gradient(135deg,#6b21a8,#c026a0); color:#fff; border-color:transparent; transform:translateY(-1px); }
 
+    /* ── Floating Suggestion Bar ── */
+    #cnp-suggest-bar {
+      position: absolute;
+      bottom: 72px;
+      left: 0; right: 0;
+      background: linear-gradient(to top, rgba(253,248,255,1) 60%, rgba(253,248,255,0));
+      padding: 12px 14px 6px;
+      z-index: 10;
+      transform: translateY(12px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(.34,1.56,.64,1);
+    }
+    #cnp-suggest-bar.cnp-suggest-visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: all;
+    }
+    .cnp-suggest-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #b09cc8;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-bottom: 7px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .cnp-suggest-label::before {
+      content: '';
+      display: inline-block;
+      width: 14px; height: 1px;
+      background: #d8b4fe;
+    }
+    .cnp-suggest-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .cnp-suggest-pill {
+      background: #fff;
+      border: 1.5px solid rgba(107,33,168,0.2);
+      color: #6b21a8;
+      border-radius: 20px;
+      padding: 5px 13px;
+      font-size: 11.5px;
+      font-family: 'Source Sans 3', sans-serif;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(107,33,168,0.07);
+      animation: cnp-pill-in 0.3s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    .cnp-suggest-pill:nth-child(1){ animation-delay: 0.05s; }
+    .cnp-suggest-pill:nth-child(2){ animation-delay: 0.10s; }
+    .cnp-suggest-pill:nth-child(3){ animation-delay: 0.15s; }
+    .cnp-suggest-pill:nth-child(4){ animation-delay: 0.20s; }
+    @keyframes cnp-pill-in {
+      from { opacity:0; transform: translateY(6px) scale(0.92); }
+      to   { opacity:1; transform: translateY(0) scale(1); }
+    }
+    .cnp-suggest-pill:hover {
+      background: linear-gradient(135deg,#6b21a8,#c026a0);
+      color: #fff;
+      border-color: transparent;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(107,33,168,0.28);
+    }
+    .cnp-suggest-refresh {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f3e8ff, #fdf8ff);
+      border: 1.5px solid rgba(107,33,168,0.2);
+      color: #7c3aed;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.25s;
+      box-shadow: 0 2px 8px rgba(107,33,168,0.1);
+    }
+    .cnp-suggest-refresh:hover {
+      background: linear-gradient(135deg,#6b21a8,#c026a0);
+      color: #fff;
+      border-color: transparent;
+      transform: rotate(180deg) scale(1.1);
+      box-shadow: 0 4px 14px rgba(107,33,168,0.3);
+    }
+    .cnp-suggest-refresh svg {
+      transition: transform 0.25s;
+    }
+
     .cnp-input-area { padding:10px 14px 14px; background:#fff; border-top:1px solid rgba(107,33,168,.1); flex-shrink:0; }
     .cnp-input-row {
       display:flex; align-items:flex-end; gap:8px;
@@ -417,6 +510,10 @@
     </div>
     <div class="cnp-messages" id="cnp-msgs"></div>
     <div class="cnp-quick-replies" id="cnp-quick"></div>
+    <div id="cnp-suggest-bar">
+      <div class="cnp-suggest-label">Suggested questions</div>
+      <div class="cnp-suggest-pills" id="cnp-suggest-pills"></div>
+    </div>
     <div class="cnp-input-area">
       <div class="cnp-input-row">
         <textarea id="cnp-input" placeholder="Ask about nutrition & mental health..." rows="1"></textarea>
@@ -449,6 +546,63 @@
   var input   = document.getElementById('cnp-input');
   var sendBtn = document.getElementById('cnp-send-btn');
   var isOpen  = false;
+
+  // ── Floating Suggestion Bar ──
+  var suggestBar   = document.getElementById('cnp-suggest-bar');
+  var suggestPills = document.getElementById('cnp-suggest-pills');
+  var suggestTimer = null;
+  var suggestVisible = false;
+
+  function renderSuggestPills(questions) {
+    suggestPills.innerHTML = '';
+    questions.forEach(function(q) {
+      var pill = document.createElement('button');
+      pill.className = 'cnp-suggest-pill';
+      pill.textContent = q;
+      pill.onclick = function() {
+        hideSuggestBar();
+        input.value = q;
+        sendMessage();
+      };
+      suggestPills.appendChild(pill);
+    });
+    // Refresh button
+    var refreshBtn = document.createElement('button');
+    refreshBtn.className = 'cnp-suggest-refresh';
+    refreshBtn.title = 'Show different questions';
+    refreshBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>';
+    refreshBtn.onclick = function() {
+      var newQ = getRandomQuestions(4);
+      renderSuggestPills(newQ);
+    };
+    suggestPills.appendChild(refreshBtn);
+  }
+
+  function showSuggestBar() {
+    if (suggestVisible) return;
+    renderSuggestPills(getRandomQuestions(4));
+    suggestBar.classList.add('cnp-suggest-visible');
+    suggestVisible = true;
+  }
+
+  function hideSuggestBar() {
+    suggestBar.classList.remove('cnp-suggest-visible');
+    suggestVisible = false;
+    clearTimeout(suggestTimer);
+  }
+
+  function scheduleSuggest() {
+    clearTimeout(suggestTimer);
+    suggestTimer = setTimeout(function() {
+      if (!sendBtn.disabled) showSuggestBar();
+    }, 8000); // 8 seconds pause → bar appears
+  }
+
+  // Hide suggest bar when user starts typing
+  input.addEventListener('focus', hideSuggestBar);
+  input.addEventListener('input', function() {
+    if (input.value.trim().length > 0) hideSuggestBar();
+  });
 
   var sessionId = sessionStorage.getItem('cnp_sid') || (function(){
     var id = 'cnp_' + Math.random().toString(36).substr(2,10) + '_' + Date.now();
@@ -500,6 +654,7 @@
     var text = input.value.trim();
     if (!text || sendBtn.disabled) return;
     if (quickShown) { quickDiv.style.display = 'none'; quickShown = false; }
+    hideSuggestBar();
     addMsg('user', text);
     input.value = '';
     input.style.height = 'auto';
@@ -522,9 +677,11 @@
       } else {
         addMsg('bot', reply);
       }
+      scheduleSuggest(); // start 8s countdown after bot replies
     } catch(err) {
       removeTyping(tid);
       addMsg('bot', '⚠️ Connection issue. Please try again.');
+      scheduleSuggest();
     }
     sendBtn.disabled = false;
     input.focus();
