@@ -263,10 +263,12 @@
     .cnp-typing-dots span:nth-child(3){animation-delay:.32s}
     @keyframes cnp-bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-7px)}}
 
-    .cnp-quick-replies { display:flex; flex-wrap:wrap; gap:6px; padding:4px 14px 10px; }
+    .cnp-quick-replies { display:flex; flex-direction:column; gap:5px; padding:4px 14px 10px; position:relative; }
+    .cnp-quick-row { display:flex; flex-wrap:wrap; gap:6px; }
+    .cnp-quick-row.cnp-row-indent { padding-left:18px; }
     .cnp-quick-header {
-      display:flex; align-items:center; justify-content:space-between;
-      padding: 8px 14px 4px;
+      display:flex; align-items:center; justify-content:flex-end;
+      padding: 6px 14px 2px;
     }
     .cnp-quick-header-label {
       font-size:10px; font-weight:600; color:#b09cc8;
@@ -279,10 +281,10 @@
     }
     .cnp-quick-btn {
       background:#fff; border:1.5px solid rgba(107,33,168,.25); color:#6b21a8;
-      border-radius:20px; padding:5px 12px; font-size:12px;
+      border-radius:20px; padding:5px 12px; font-size:12px; text-align:left;
       font-family:'Source Sans 3',sans-serif; cursor:pointer; font-weight:500; transition:all .2s;
     }
-    .cnp-quick-btn:hover { background:linear-gradient(135deg,#6b21a8,#c026a0); color:#fff; border-color:transparent; transform:translateY(-1px); }
+    .cnp-quick-btn:hover { background:linear-gradient(135deg,#6b21a8,#c026a0); color:#fff; border-color:transparent; transform:translateY(-2px); box-shadow:0 4px 12px rgba(107,33,168,0.25); }
     .cnp-quick-refresh {
       width:26px; height:26px; border-radius:50%;
       background:rgba(107,33,168,0.08); border:1.5px solid rgba(107,33,168,0.2);
@@ -490,7 +492,6 @@
     <div class="cnp-messages" id="cnp-msgs"></div>
     <div id="cnp-quick-header" style="display:none">
       <div class="cnp-quick-header">
-        <span class="cnp-quick-header-label">Suggested topics</span>
         <button class="cnp-quick-refresh" id="cnp-refresh-btn" title="Refresh questions">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
         </button>
@@ -541,7 +542,14 @@
 
   function loadQuestions() {
     quickDiv.innerHTML = '';
-    getRandomQuestions(4).forEach(function(q) {
+    var questions = getRandomQuestions(4);
+    // Row 1 — first 2 questions, normal position
+    var row1 = document.createElement('div');
+    row1.className = 'cnp-quick-row';
+    // Row 2 — last 2 questions, indented right
+    var row2 = document.createElement('div');
+    row2.className = 'cnp-quick-row cnp-row-indent';
+    questions.forEach(function(q, i) {
       var b = document.createElement('button');
       b.className = 'cnp-quick-btn';
       b.textContent = q;
@@ -550,14 +558,16 @@
         input.value = q;
         sendMessage();
       };
-      quickDiv.appendChild(b);
+      if (i < 2) { row1.appendChild(b); } else { row2.appendChild(b); }
     });
+    quickDiv.appendChild(row1);
+    quickDiv.appendChild(row2);
   }
 
   function openQuickPanel() {
     loadQuestions();
     quickHeader.style.display = 'block';
-    quickDiv.style.display = 'flex';
+    quickDiv.style.display = 'block';
     msgs.scrollTop = msgs.scrollHeight;
   }
 
