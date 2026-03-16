@@ -170,10 +170,10 @@
     .cnp-series-label{display:block;font-size:10px;font-weight:400;opacity:0.7;margin-top:3px;}
 
     /* ── Quick Replies ── */
-    .cnp-quick-replies{display:flex;flex-direction:column;gap:5px;padding:4px 14px 10px;position:relative;}
+    .cnp-quick-replies{display:flex;flex-direction:column;gap:5px;padding:4px 14px 8px;position:relative;border-bottom:1px solid rgba(107,33,168,0.07);}
     .cnp-quick-row{display:flex;flex-wrap:wrap;gap:6px;}
-    .cnp-quick-row.cnp-row-indent{padding-left:18px;}
-    .cnp-quick-header{display:flex;align-items:center;justify-content:flex-end;padding:6px 14px 2px;}
+    .cnp-quick-row.cnp-row-indent{padding-left:0;}
+    .cnp-quick-header{display:flex;align-items:center;justify-content:flex-end;padding:4px 14px 2px;}
     .cnp-quick-btn{background:#fff;border:1.5px solid rgba(107,33,168,.25);color:#6b21a8;border-radius:20px;padding:5px 12px;font-size:12px;text-align:left;font-family:'Source Sans 3',sans-serif;cursor:pointer;font-weight:500;transition:all .2s;}
     .cnp-quick-btn:hover{background:linear-gradient(135deg,#6b21a8,#c026a0);color:#fff;border-color:transparent;transform:translateY(-2px);box-shadow:0 4px 12px rgba(107,33,168,0.25);}
     .cnp-quick-refresh{width:26px;height:26px;border-radius:50%;background:rgba(107,33,168,0.08);border:1.5px solid rgba(107,33,168,0.2);color:#7c3aed;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.25s;}
@@ -291,14 +291,11 @@
       <button class="cnp-history-btn" id="cnp-hist-no">Start fresh</button>
     </div>
     <div class="cnp-messages" id="cnp-msgs"></div>
-    <div id="cnp-quick-header" style="display:none">
-      <div class="cnp-quick-header">
-        <button class="cnp-quick-refresh" id="cnp-refresh-btn" title="Refresh questions">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-        </button>
-      </div>
+    <div class="cnp-quick-replies" id="cnp-quick">
+      <button class="cnp-quick-refresh" id="cnp-refresh-btn" title="Refresh questions" style="position:absolute;bottom:8px;right:14px;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </button>
     </div>
-    <div class="cnp-quick-replies" id="cnp-quick"></div>
     <div class="cnp-input-area">
       <div class="cnp-input-row">
         <textarea id="cnp-input" placeholder="Ask about nutrition & mental health..." rows="1"></textarea>
@@ -312,7 +309,6 @@
   var input       = document.getElementById('cnp-input');
   var sendBtn     = document.getElementById('cnp-send-btn');
   var quickDiv    = document.getElementById('cnp-quick');
-  var quickHeader = document.getElementById('cnp-quick-header');
   var refreshBtn  = document.getElementById('cnp-refresh-btn');
   var hintBtn     = document.getElementById('cnp-hint-btn');
   var histBanner  = document.getElementById('cnp-history-banner');
@@ -359,9 +355,9 @@
   }
   function openQuickPanel(){
     loadQuestions();
-    quickHeader.style.display='block'; quickDiv.style.display='block'; msgs.scrollTop=msgs.scrollHeight;
+    quickDiv.style.display='block'; msgs.scrollTop=msgs.scrollHeight;
   }
-  function closeQuickPanel(){ quickHeader.style.display='none'; quickDiv.style.display='none'; hintOpen=false; hintBtn.classList.remove('cnp-hint-open'); }
+  function closeQuickPanel(){ quickDiv.style.display='none'; hintOpen=false; hintBtn.classList.remove('cnp-hint-open'); }
 
   refreshBtn.addEventListener('click',function(){ refreshBtn.style.transform='rotate(180deg)'; setTimeout(function(){ refreshBtn.style.transform=''; },300); loadQuestions(); });
   hintBtn.addEventListener('click',function(){ hintOpen=!hintOpen; hintBtn.classList.toggle('cnp-hint-open',hintOpen); if(hintOpen) openQuickPanel(); else closeQuickPanel(); });
