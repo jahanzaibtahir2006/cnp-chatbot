@@ -132,9 +132,8 @@
       background:#fff;border-radius:4px 14px 14px 14px;
       box-shadow:0 2px 10px rgba(107,33,168,.1);border:1px solid rgba(107,33,168,.08);
       transition:box-shadow 0.2s, border-color 0.2s;
-      padding-top:26px;
     }
-    .cnp-msg.cnp-bot .cnp-msg-bubble:hover {
+    .cnp-msg-col:hover .cnp-msg.cnp-bot .cnp-msg-bubble {
       box-shadow:0 4px 18px rgba(107,33,168,.15);
       border-color:rgba(107,33,168,0.2);
     }
@@ -148,18 +147,21 @@
     @keyframes cnp-bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-7px)}}
     .cnp-typing-status{font-size:11px;color:#b09cc8;font-style:italic;animation:cnp-sfade 1.8s ease-in-out infinite;}
     @keyframes cnp-sfade{0%,100%{opacity:0.5}50%{opacity:1}}
+
+    /* ── Copy Button (floats above bubble top-right, shows on col hover) ── */
     .cnp-copy-btn {
-      position:absolute;top:6px;right:8px;
+      position:absolute;top:-10px;right:4px;
       display:none;align-items:center;gap:3px;
-      padding:2px 7px;border-radius:8px;
-      background:rgba(107,33,168,0.07);border:1px solid rgba(107,33,168,0.18);
-      color:#9b7cc4;font-size:9.5px;font-family:'Source Sans 3',sans-serif;
+      padding:3px 8px;border-radius:8px;
+      background:#fff;border:1px solid rgba(107,33,168,0.22);
+      color:#7c6a9a;font-size:9.5px;font-family:'Source Sans 3',sans-serif;
       cursor:pointer;font-weight:600;transition:all 0.18s;
+      box-shadow:0 2px 8px rgba(107,33,168,0.14);
       white-space:nowrap;z-index:10;
     }
-    .cnp-msg-bubble:hover .cnp-copy-btn { display:flex; }
-    .cnp-copy-btn:hover { background:rgba(107,33,168,0.15);color:#4a0e7a;border-color:rgba(107,33,168,0.35); }
-    .cnp-copy-btn.copied { background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.35);color:#16a34a; }
+    .cnp-msg-col:hover .cnp-copy-btn { display:flex; }
+    .cnp-copy-btn:hover { background:#f3e8ff;color:#4a0e7a;border-color:rgba(107,33,168,0.4); }
+    .cnp-copy-btn.copied { background:#f0fdf4;border-color:rgba(34,197,94,0.35);color:#16a34a; }
 
     /* ── Follow-up Suggestions (single line, wrap only if needed) ── */
     .cnp-followup-wrap { display:flex;flex-wrap:nowrap;gap:6px;padding:2px 0 0 38px;animation:cnp-msgIn .3s ease;overflow:visible; }
@@ -214,7 +216,7 @@
   var HISTORY_KEY = 'cnp_chat_history';
   var unreadCount = 0;
 
-  var TYPING_STATUSES = ['Thinking...','Searching the best...','Preparing your answer...','Looking that up...','Analyzing your question...'];
+  var TYPING_STATUSES = ['Thinking...','Searching knowledge base...','Preparing your answer...','Looking that up...','Analyzing your question...'];
 
   // ── Follow-up map — only for specific topics ──
   var FOLLOWUP_MAP = {
@@ -495,10 +497,9 @@
       grid.appendChild(sb);
     });
     bub.appendChild(grid);
-    var cp=addCopyBtn(bub); bub.appendChild(cp);
     var time=document.createElement('div'); time.className='cnp-msg-time';
     time.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-    col.appendChild(bub); col.appendChild(time); wrap.appendChild(av); wrap.appendChild(col);
+    col.appendChild(bub); col.appendChild(addCopyBtn(bub)); col.appendChild(time); wrap.appendChild(av); wrap.appendChild(col);
     msgs.appendChild(wrap); msgs.scrollTop=msgs.scrollHeight;
   }
 
@@ -513,10 +514,9 @@
     series.courses.forEach(function(c){ h+='<li><a href="'+c.url+'" target="_blank">'+c.name+'</a></li>'; });
     h+='</ul><br><a href="https://www.nutritional-psychology.org/courses" target="_blank">View All CNP Courses</a>';
     bub.innerHTML=h;
-    var cp=addCopyBtn(bub); bub.appendChild(cp);
     var time=document.createElement('div'); time.className='cnp-msg-time';
     time.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-    col.appendChild(bub); col.appendChild(time); wrap.appendChild(av); wrap.appendChild(col);
+    col.appendChild(bub); col.appendChild(addCopyBtn(bub)); col.appendChild(time); wrap.appendChild(av); wrap.appendChild(col);
     msgs.appendChild(wrap); msgs.scrollTop=msgs.scrollHeight;
   }
 
@@ -543,10 +543,11 @@
     if(isBot) av.innerHTML='<img src="'+LOGO+'" style="width:100%;height:100%;object-fit:contain" onerror="this.parentNode.textContent=\'🧠\'"/>'; else av.textContent='You';
     var col=document.createElement('div'); col.className='cnp-msg-col';
     var bub=document.createElement('div'); bub.className='cnp-msg-bubble'; bub.innerHTML=formatMessage(text);
-    if(isBot && withCopy!==false){ var cp=addCopyBtn(bub); bub.appendChild(cp); }
     var time=document.createElement('div'); time.className='cnp-msg-time';
     time.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-    col.appendChild(bub); col.appendChild(time); wrap.appendChild(av); wrap.appendChild(col);
+    col.appendChild(bub);
+    if(isBot && withCopy!==false){ col.appendChild(addCopyBtn(bub)); }
+    col.appendChild(time); wrap.appendChild(av); wrap.appendChild(col);
     msgs.appendChild(wrap); msgs.scrollTop=msgs.scrollHeight;
   }
 
